@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一句话记账</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>一句话记账</h1>
+            <p class="subtitle">用自然语言轻松记录每一笔收支</p>
+        </header>
+
+        <main class="main">
+            <section class="input-section">
+                <div class="input-wrapper">
+                    <textarea 
+                        id="inputText" 
+                        placeholder="输入一句话，例如：我刚刚在便利店买了一包烟"
+                        rows="3"
+                    ></textarea>
+                    <div class="input-actions">
+                        <button id="voiceBtn" class="btn btn-voice">
+                            <span class="icon">🎤</span>
+                            语音输入
+                        </button>
+                        <button id="analyzeBtn" class="btn btn-primary">
+                            <span class="icon">🔍</span>
+                            分析并记录
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="analysisSection" class="analysis-section hidden">
+                <div class="analysis-result">
+                    <h3>分析结果</h3>
+                    <div class="analysis-content">
+                        <div class="field">
+                            <span class="field-label">原始输入：</span>
+                            <span id="originalText" class="field-value"></span>
+                        </div>
+                        <div class="field">
+                            <span class="field-label">类型：</span>
+                            <span id="recordType" class="field-value"></span>
+                        </div>
+                        <div class="field">
+                            <span class="field-label">时间：</span>
+                            <span id="recordTime" class="field-value"></span>
+                        </div>
+                        <div class="field">
+                            <span class="field-label">地点：</span>
+                            <span id="recordLocation" class="field-value"></span>
+                            <input type="text" id="locationInput" class="field-input hidden" placeholder="请输入地点">
+                        </div>
+                        <div class="field">
+                            <span class="field-label">物品：</span>
+                            <span id="recordItem" class="field-value"></span>
+                            <input type="text" id="itemInput" class="field-input hidden" placeholder="请输入物品">
+                        </div>
+                        <div class="field">
+                            <span class="field-label">金额：</span>
+                            <span id="recordAmount" class="field-value"></span>
+                            <input type="number" id="amountInput" class="field-input hidden" placeholder="请输入金额" step="0.01" min="0">
+                        </div>
+                        <div class="field">
+                            <span class="field-label">类别：</span>
+                            <select id="categorySelect" class="field-select">
+                                <option value="餐饮美食">餐饮美食</option>
+                                <option value="日用百货">日用百货</option>
+                                <option value="交通出行">交通出行</option>
+                                <option value="休闲娱乐">休闲娱乐</option>
+                                <option value="服饰美容">服饰美容</option>
+                                <option value="居住家居">居住家居</option>
+                                <option value="医疗健康">医疗健康</option>
+                                <option value="教育学习">教育学习</option>
+                                <option value="通讯缴费">通讯缴费</option>
+                                <option value="工资收入">工资收入</option>
+                                <option value="红包礼金">红包礼金</option>
+                                <option value="投资理财">投资理财</option>
+                                <option value="兼职副业">兼职副业</option>
+                                <option value="其他支出">其他支出</option>
+                                <option value="其他收入">其他收入</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="missingFields" class="missing-fields hidden">
+                        <div class="warning-icon">⚠️</div>
+                        <div class="warning-message">
+                            <p>检测到以下信息缺失，请补充：</p>
+                            <ul id="missingList"></ul>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-actions">
+                        <button id="saveBtn" class="btn btn-success">
+                            <span class="icon">💾</span>
+                            保存记录
+                        </button>
+                        <button id="cancelBtn" class="btn btn-secondary">
+                            <span class="icon">❌</span>
+                            取消
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="records-section">
+                <div class="section-header">
+                    <h3>记账记录</h3>
+                    <div class="stats">
+                        <span class="stat-item">
+                            <span class="stat-label">支出：</span>
+                            <span id="totalExpense" class="stat-value expense">¥0.00</span>
+                        </span>
+                        <span class="stat-item">
+                            <span class="stat-label">收入：</span>
+                            <span id="totalIncome" class="stat-value income">¥0.00</span>
+                        </span>
+                    </div>
+                </div>
+                
+                <div id="recordsList" class="records-list">
+                    <div class="empty-state">
+                        <p>暂无记账记录</p>
+                        <p class="hint">试试输入一句话开始记账吧！</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2026 一句话记账 - 让记账变得简单</p>
+        </footer>
+    </div>
+
+    <div id="voiceModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="voice-indicator">
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring"></div>
+                <div class="mic-icon">🎤</div>
+            </div>
+            <h3>正在听您说话...</></h3>
+            <button id="stopVoiceBtn" class="btn btn-danger mt-20">
+                停止语音输入
+            </button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

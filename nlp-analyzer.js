@@ -146,13 +146,13 @@ const nlpAnalyzer = {
     }
 
     const locationPatterns = [
-      /在([\u4e00-\\u9fa5]{2,10})(上|里|内|旁|边|处|前|后)/,
-      /在([\u4e00-\\u9fa5]{2,10})的(上|里|内|旁|边|处|前|后)/,
-      /在([\u4e00-\\u9fa5]{2,8})楼/,
-      /在([\u4e00-\\u9fa5]{2,8})层/,
-      /在([\u4e00-\\u9fa5]{2,10})买/,
-      /在([\u4e00-\\u9fa5]{2,10})吃/,
-      /在([\u4e00-\\u9fa5]{2,10})喝/
+      /在([\u4e00-\u9fa5]{2,10})(上|里|内|旁|边|处|前|后)/,
+      /在([\u4e00-\u9fa5]{2,10})的(上|里|内|旁|边|处|前|后)/,
+      /在([\u4e00-\u9fa5]{2,8})楼/,
+      /在([\u4e00-\u9fa5]{2,8})层/,
+      /在([\u4e00-\u9fa5]{2,10})买/,
+      /在([\u4e00-\u9fa5]{2,10})吃/,
+      /在([\u4e00-\u9fa5]{2,10})喝/
     ];
 
     for (const pattern of locationPatterns) {
@@ -168,7 +168,7 @@ const nlpAnalyzer = {
       }
     }
 
-    const genericLocationMatch = text.match(/在([\u4e00-\\u9fa5]{2,10})(买|吃|喝|去|到)/);
+    const genericLocationMatch = text.match(/在([\u4e00-\u9fa5]{2,10})(买|吃|喝|去|到)/);
     if (genericLocationMatch && genericLocationMatch[1]) {
       const candidate = genericLocationMatch[1].trim();
       if (this.isValidLocation(candidate) && !this.isLikelyItem(candidate)) {

@@ -112,7 +112,16 @@ const nlpAnalyzer = {
       '花店', '绿植店', '宠物医院', '宠物店',
       '干洗店', '洗衣店', '缝纫店',
       '开锁店', '维修店', '家政服务',
-      '搬家公司', '物流公司', '快递公司'
+      '搬家公司', '物流公司', '快递公司',
+      '天台', '楼顶', '阳台', '露台', '屋顶',
+      '楼下', '楼上', '路边', '街角', '路口',
+      '门口', '门前', '门后', '窗边', '墙角',
+      '厨房', '客厅', '卧室', '卫生间', '浴室',
+      '书房', '餐厅', '阳台', '走廊', '楼梯',
+      '地下室', '阁楼', '车库', '储藏室',
+      '地铁站口', '公交站旁', '火车站前', '机场内',
+      '地铁站里', '公交车上', '出租车里', '火车上',
+      '飞机上', '轮船上', '地铁里', '公交里'
     ];
 
     locationKeywords.sort((a, b) => b.length - a.length);
@@ -133,6 +142,37 @@ const nlpAnalyzer = {
         if (this.isValidLocation(keyword)) {
           return keyword;
         }
+      }
+    }
+
+    const locationPatterns = [
+      /在([\u4e00-\\u9fa5]{2,10})(上|里|内|旁|边|处|前|后)/,
+      /在([\u4e00-\\u9fa5]{2,10})的(上|里|内|旁|边|处|前|后)/,
+      /在([\u4e00-\\u9fa5]{2,8})楼/,
+      /在([\u4e00-\\u9fa5]{2,8})层/,
+      /在([\u4e00-\\u9fa5]{2,10})买/,
+      /在([\u4e00-\\u9fa5]{2,10})吃/,
+      /在([\u4e00-\\u9fa5]{2,10})喝/
+    ];
+
+    for (const pattern of locationPatterns) {
+      const match = text.match(pattern);
+      if (match && match[1]) {
+        const candidate = match[1].trim();
+        if (this.isValidLocation(candidate) && !this.isLikelyItem(candidate)) {
+          if (match[2]) {
+            return candidate + match[2];
+          }
+          return candidate;
+        }
+      }
+    }
+
+    const genericLocationMatch = text.match(/在([\u4e00-\\u9fa5]{2,10})(买|吃|喝|去|到)/);
+    if (genericLocationMatch && genericLocationMatch[1]) {
+      const candidate = genericLocationMatch[1].trim();
+      if (this.isValidLocation(candidate) && !this.isLikelyItem(candidate)) {
+        return candidate;
       }
     }
 
@@ -180,6 +220,54 @@ const nlpAnalyzer = {
     }
     
     return true;
+  },
+
+  isLikelyItem(candidate) {
+    if (!candidate || candidate.length < 1) return false;
+    
+    const itemKeywords = [
+      '臭豆腐', '麻辣烫', '火锅', '烧烤', '小龙虾', '烤鱼',
+      '奶茶', '咖啡', '果汁', '汽水', '可乐', '雪碧',
+      '烟', '酒', '啤酒', '白酒', '红酒',
+      '饭', '米饭', '面条', '饺子', '包子', '馒头',
+      '早餐', '午餐', '晚餐', '夜宵', '外卖',
+      '水果', '苹果', '香蕉', '橙子', '西瓜', '草莓',
+      '蔬菜', '白菜', '萝卜', '土豆', '西红柿',
+      '零食', '薯片', '饼干', '巧克力', '糖果',
+      '甜品', '蛋糕', '面包', '冰淇淋', '酸奶',
+      '衣服', '裤子', '裙子', '外套', '内衣',
+      '鞋子', '袜子', '帽子', '围巾', '手套',
+      '包包', '背包', '手提包', '钱包', '行李箱',
+      '化妆品', '护肤品', '口红', '面膜', '洗面奶',
+      '手机', '电脑', '平板', '耳机', '充电器',
+      '电影票', '火车票', '机票', '门票',
+      '话费', '流量', '网费', '电费', '水费', '燃气费',
+      '房租', '房贷', '车贷', '保险', '医疗', '药品',
+      '工资', '奖金', '红包', '报销', '兼职', '理财',
+      '炒面', '炒饭', '烧烤', '烤串', '炸鸡', '汉堡',
+      '披萨', '寿司', '拉面', '米线', '米粉',
+      '奶茶', '奶盖', '咖啡', '拿铁', '卡布奇诺',
+      '香烟', '雪茄', '啤酒', '红酒', '白酒', '洋酒',
+      '零食', '坚果', '糖果', '巧克力', '饼干', '薯片',
+      '水果', '苹果', '香蕉', '橙子', '葡萄', '草莓',
+      '蔬菜', '青菜', '白菜', '萝卜', '土豆', '黄瓜'
+    ];
+    
+    for (const keyword of itemKeywords) {
+      if (candidate === keyword || candidate.includes(keyword)) {
+        const quantifiers = ['个', '只', '瓶', '盒', '包', '袋', '件', '杯', '份', '条', '双', '张', '块', '根', '台', '辆', '套', '碗', '盘', '碟'];
+        for (const q of quantifiers) {
+          if (candidate === q + keyword) {
+            return true;
+          }
+        }
+        if (candidate === keyword) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
   },
 
   extractItem(text) {
